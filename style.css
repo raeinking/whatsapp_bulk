@@ -54,3 +54,9 @@ td:last-child {
     align-items: center;
     padding: 10px;
 }
+
+.country {
+    margin: 5px 0px;
+    width: 170px;
+    padding: 7px;
+}

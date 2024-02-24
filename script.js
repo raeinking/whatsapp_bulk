@@ -31,56 +31,6 @@ document.addEventListener("DOMContentLoaded", function() {
       openContainer.style.display = 'flex';
     });
 
-    // for (var i = 0; i < addButtons.length; i++) {
-    //     addButtons[i].addEventListener('click', function() {
-    //       openContainer.style.display = 'none';
-    //         var inputvalue = document.getElementsByClassName('inputfeld')[0].value;
-    //         // Check if input value is empty or contains only whitespace
-    //         if (!inputvalue.trim()) {
-    //             return; // Exit function if input value is empty
-    //         }
-            
-    //         var lines = inputvalue.split('\n');
-            
-    //         for (var j = 0; j < lines.length; j++) {  
-    //             var newRow = document.createElement('tr');
-    
-    //             var cell1 = document.createElement('td');
-    //             cell1.textContent = rowCounter++; // Increment row counter for each new row
-    
-    //             var cell2 = document.createElement('td');
-    //             cell2.textContent = lines[j].trim();
-    
-    //             var cell3 = document.createElement('td');
-    //             cell3.classList.add('text-center');
-    
-    //             var editButton = document.createElement('button');
-    //             editButton.setAttribute('type', 'button');
-    //             editButton.classList.add('btn', 'btn-primary', 'btn-xs', 'dt-edit');
-    //             editButton.style.marginRight = '16px';
-    //             var editSpan = document.createElement('span');
-    //             editSpan.classList.add('glyphicon', 'glyphicon-pencil');
-    //             editButton.appendChild(editSpan);
-    
-    //             var deleteButton = document.createElement('button');
-    //             deleteButton.setAttribute('type', 'button');
-    //             deleteButton.classList.add('btn', 'btn-danger', 'btn-xs', 'dt-delete');
-    //             var deleteSpan = document.createElement('span');
-    //             deleteSpan.classList.add('glyphicon', 'glyphicon-remove');
-    //             deleteButton.appendChild(deleteSpan);
-    
-    //             cell3.appendChild(editButton);
-    //             cell3.appendChild(deleteButton);
-    
-    //             newRow.appendChild(cell1);
-    //             newRow.appendChild(cell2);
-    //             newRow.appendChild(cell3);
-    
-    //             dataTable.row.add(newRow).draw(false);
-    //         }
-    //     });
-    // }
-
   var addButtons = document.querySelectorAll('.dt-add');
   var rowCounter = 1;
 
@@ -88,6 +38,7 @@ addButtons.forEach(function(button) {
   button.addEventListener('click', function() {
     var openContainer = document.querySelector('.inputsss'); 
     var inputvalue = document.querySelector('.inputfeld').value;
+    var countryCode = document.querySelector('.country').value;
     
     if (!inputvalue.trim()) {
       return;
@@ -102,27 +53,18 @@ addButtons.forEach(function(button) {
       cell1.textContent = rowCounter++; 
       
       var cell2 = document.createElement('td');
-      cell2.textContent = lines[j].trim();
+      cell2.textContent = countryCode + lines[j].trim();
       
       var cell3 = document.createElement('td');
       cell3.classList.add('text-center');
-      
-      var editButton = document.createElement('button');
-      editButton.setAttribute('type', 'button');
-      editButton.classList.add('btn', 'btn-primary', 'btn-xs', 'dt-edit');
-      editButton.style.marginRight = '16px';
-      var editSpan = document.createElement('span');
-      editSpan.classList.add('glyphicon', 'glyphicon-pencil');
-      editButton.appendChild(editSpan);
       
       var deleteButton = document.createElement('button');
       deleteButton.setAttribute('type', 'button');
       deleteButton.classList.add('btn', 'btn-danger', 'btn-xs', 'dt-delete');
       var deleteSpan = document.createElement('span');
-      deleteSpan.classList.add('glyphicon', 'glyphicon-remove');
+      deleteSpan.classList.add('glyphicon', 'glyphicon-remove' , 'dt-delete');
       deleteButton.appendChild(deleteSpan);
       
-      cell3.appendChild(editButton);
       cell3.appendChild(deleteButton);
       
       newRow.appendChild(cell1);
@@ -136,31 +78,24 @@ addButtons.forEach(function(button) {
   });
 });
 
-var editButtons = document.getElementsByClassName('dt-edit');
-    for (var i = 0; i < editButtons.length; i++) {
-      editButtons[i].addEventListener('click', function(evt) {
-        var dtRow = evt.target.closest('tr');
-        var modalBody = document.querySelector('.modal-body');
-        modalBody.innerHTML = '';
-        modalBody.innerHTML += 'Row index: ' + dtRow.rowIndex + '<br/>';
-        modalBody.innerHTML += 'Number of columns: ' + dtRow.cells.length + '<br/>';
-        for (var i = 0; i < dtRow.cells.length; i++) {
-          modalBody.innerHTML += 'Cell (column, row) ' + dtRow.cells[i].cellIndex + ', ' + dtRow.rowIndex + ' => innerHTML : ' + dtRow.cells[i].innerHTML + '<br/>';
-        }
-        document.getElementById('myModal').classList.add('show');
-        document.getElementById('myModal').style.display = 'block';
-      });
+var dataTableContainer = document.querySelector('.dataTable');
+
+dataTableContainer.addEventListener('click', function(evt) {
+  if (evt.target && evt.target.classList.contains('dt-delete')) {
+    var dtRow = evt.target.closest('tr');
+    if (confirm("Are you sure to delete this row?")) {
+      dataTable.row(dtRow).remove().draw(false);
+      updateRowIDs(); 
     }
-  
-    var deleteButtons = document.getElementsByClassName('dt-delete');
-    for (var i = 0; i < deleteButtons.length; i++) {
-      deleteButtons[i].addEventListener('click', function(evt) {
-        var dtRow = evt.target.closest('tr');
-        if (confirm("Are you sure to delete this row?")) {
-          dataTable.row(dtRow).remove().draw(false);
-        }
-      });
-    }
+  }
+});
+
+function updateRowIDs() {
+  var rows = dataTable.rows().nodes();
+  for (var i = 0; i < rows.length; i++) {
+    rows[i].querySelector('td:first-child').textContent = i + 1;
+  }
+}
   
     var modal = document.getElementById('myModal');
     modal.addEventListener('click', function(evt) {
@@ -176,4 +111,3 @@ var editButtons = document.getElementsByClassName('dt-edit');
       });
     }
   });
-  

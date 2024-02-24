@@ -13,7 +13,7 @@
   <div class="inputsss dt-container">
     <div class="numberContainer">
       <textarea class="inputNumbers inputfeld"></textarea>      
-      <input class="" placeholder="964" />      
+      <input class="country" placeholder="964" />      
       <div class="btnContainer">
         <button type="button" class="btn btn-danger btn-md dt-close">Cancl</button>
         <button type="button" data-func="dt-add" class="btn btn-success btn-md dt-add">Confirm</button>
@@ -21,7 +21,11 @@
     </div>
   </div>
   <!-- this is the add numbers list  -->
+
   <button type="button" data-func="open" class="btn btn-success btn-xs dt-open">
+    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+  </button>
+  <button type="button" data-func="send" class="btn btn-success btn-xs dt-send">
     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
   </button>
 
@@ -30,14 +34,10 @@
       <tr>
         <th>ID</th>
         <th>Phone</th>
-        <th style="text-align:center;width:100px;">Add row <button type="button" data-func="" class="btn btn-success btn-xs ">
-            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-          </button></th>
+        <th style="text-align:center;width:100px;">Add row</th>
       </tr>
     </thead>
     <tbody>
-
-
     </tbody>
   </table>
   
@@ -58,7 +58,6 @@
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>
       </div>
-  
     </div>
   </div>
 
