@@ -1,67 +1,180 @@
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
-const puppeteer = require('puppeteer-core');
-const path = require('path');
-
-// Function to create the main window
-function createWindow() {
-    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-    mainWindow = new BrowserWindow({
-        width: width,
-        height: height,
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
-        }
-    });
-
-    mainWindow.loadFile('index.html');
-}
-
-// Create the main window when Electron is ready
-app.whenReady().then(() => {
-    createWindow();
-
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    });
-});
-
-// Listen for 'open-chrome' event from the renderer process
-ipcMain.on('open-chrome', async () => {
-    try {
-        // Specify the path to the Chrome executable
-        const chromePath = 'C:\\Users\\Rayan Developer\\Documents\\chrome-win64\\chrome-win64\\chrome.exe';
-
-        // Launch Puppeteer with the specified Chrome executable path
-        const browser = await puppeteer.launch({
-            executablePath: chromePath,
-            headless: false 
+    const { app, BrowserWindow, ipcMain, screen } = require('electron');
+    const puppeteer = require('puppeteer-core');
+    const path = require('path');
+    const fs = require('fs');
+    const { Client } = require('whatsapp-web.js');
+    const qrcode = require('qrcode-terminal');
+    const { WebDriver, Builder, By, until } = require('selenium-webdriver');
+    const chrome = require('selenium-webdriver/chrome');
+    
+    // Function to create the main window
+    function createWindow() {
+        const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+        mainWindow = new BrowserWindow({
+            width: width,
+            height: height,
+            webPreferences: {
+                preload: path.join(__dirname, 'preload.js')
+            }
         });
 
-        // Create a new page
-        const page = await browser.newPage();
+        mainWindow.loadFile('index.html');
+    }
 
-        // Navigate to WhatsApp
-        await page.goto('https://web.whatsapp.com/');
+    // Function to find Chrome executable path
+    function findChromePath() {
+        const possiblePaths = [
+            "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+            // Add more potential paths here based on common installation directories
+        ];
 
-        // Continuously check if the QR code is scanned
-        const intervalId = setInterval(async () => {
-            const qrCodeContainer = await page.$('canvas');
-
-            if (qrCodeContainer === null) {
-                // If the QR code container is no longer present, it means the QR code has been scanned
-                clearInterval(intervalId);
-
-                // Display alert when connected
-                await page.evaluate(() => {
-                    alert('WhatsApp connected!');
-                });
-
-                // Close the browser
-                // await browser.close();
+        for (const path of possiblePaths) {
+            if (fs.existsSync(path)) {
+                return path;
             }
-        }, 1000); // Check every second
+        }
+        
+        return null;
+    }
+
+    // Create the main window when Electron is ready
+    app.whenReady().then(() => {
+        createWindow();
+
+        app.on('activate', () => {
+            if (BrowserWindow.getAllWindows().length === 0) {
+                createWindow();
+            }
+        });
+    });
+
+    // Listen for 'open-chrome' event from the renderer process
+    let browser;  // declare browser variable outside the 'open-chrome' event listener
+
+    // Listen for 'open-chrome' event from the renderer process
+    ipcMain.on('open-chrome', async () => {
+        try {
+            // Find Chrome executable path
+            const chromePath = findChromePath();
+            console.log(chromePath);
+    
+            if (!chromePath) {
+                throw new Error('Chrome executable not found.');
+            }
+    
+            // Launch Puppeteer with the found Chrome executable path
+            browser = await puppeteer.launch({
+                executablePath: chromePath,
+                headless: false 
+            });
+    
+            // Get existing pages or create a new one
+            const pages = await browser.pages();
+            const page = pages.length > 0 ? pages[0] : await browser.newPage();
+    
+            // Set the viewport size manually
+            const { width, height } = mainWindow.getContentSize();
+            console.log(width, height);
+
+                // Set the viewport size to match the content size of the Electron window
+            await page.setViewport({ width, height });
+                            
+            // Navigate to WhatsApp website
+            await page.goto('https://web.whatsapp.com/');
+    
+        } catch (error) {
+            console.error('An error occurred:', error);
+        }
+    });
+    // Listen for 'dt-start' event from the renderer process
+// Define the sleep function
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Event handler to send messages to numbers
+ipcMain.on('dt-start', async (event, numbers) => {
+    try {
+        // Ensure that the browser instance is available
+        if (!browser) {
+            throw new Error('Browser instance not available. Open Chrome first.');
+        }
+
+        // Get the existing pages
+        const pages = await browser.pages();
+
+        // If there are no open pages, throw an error
+        if (pages.length === 0) {
+            throw new Error('No open pages available.');
+        }
+
+        // Use the first page to send messages
+        const page = pages[0];
+
+        // Loop through each number to send a message
+        for (let idx = 0; idx < numbers.length; idx++) {
+            const number = numbers[idx].trim();
+            if (number === "") {
+                continue;
+            }
+            
+            console.log(`${idx + 1}/${numbers.length} => Sending message to ${number}.`);
+
+            // Navigate to the URL for sending message to the current number
+            await page.goto(`https://web.whatsapp.com/send?phone=${number}`, { waitUntil: 'load' });
+
+            // Wait for the attachment button to appear with an increased timeout after page fully loaded
+            await page.waitForSelector('.bo8jc6qi', { timeout: 60000 });
+
+            // Click on the attachment button
+            await page.evaluate(() => {
+                // Find the element with class 'bo8jc6qi' and click it
+                const attachMenuPlus = document.querySelector('.bo8jc6qi');
+                if (attachMenuPlus) {
+                    attachMenuPlus.click();
+                }
+            });
+
+            // Wait for the file input to appear
+            await page.waitForSelector('input[type="file"]');
+
+            const image_path = "C:\\Users\\hr\\Pictures\\Screenshots\\d.png";
+
+            // Get the file extension from the image_path
+            const extname = path.extname(image_path).toLowerCase();
+            let fileTypeSelector;
+
+            // Determine the file type and adjust the selector accordingly
+            switch (extname) {
+                case '.jpg':
+                case '.jpeg':
+                case '.png':
+                    fileTypeSelector = 'input[type="file"][accept*="image"]';
+                    break;
+                case '.mp4':
+                case '.mov':
+                    fileTypeSelector = 'input[type="file"][accept*="video"]';
+                    break;
+                default:
+                    throw new Error(`Unsupported file type: ${extname}`);
+            }
+
+            // Upload the file using the determined file type selector
+            const input = await page.$(fileTypeSelector);
+            await input.uploadFile(image_path);
+
+            // Wait for the send button to become clickable
+            await page.waitForSelector('.p357zi0d', { timeout: 10000 });
+
+            // Click on the send button
+            await page.evaluate(() => {
+                const sendButton = document.querySelector('svg[title="send"]');
+                if (sendButton) {
+                    sendButton.parentNode.click(); // Click on the parent node to trigger the click event
+                }
+            });
+        }
     } catch (error) {
         console.error('An error occurred:', error);
     }
