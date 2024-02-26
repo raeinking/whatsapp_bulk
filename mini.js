@@ -78,7 +78,7 @@
             console.log(width, height);
 
                 // Set the viewport size to match the content size of the Electron window
-            await page.setViewport({ width, height });
+            await page.setViewport({ width: 1000, height: 800 });
                             
             // Navigate to WhatsApp website
             await page.goto('https://web.whatsapp.com/');
@@ -122,7 +122,7 @@ ipcMain.on('dt-start', async (event, numbers) => {
             console.log(`${idx + 1}/${numbers.length} => Sending message to ${number}.`);
 
             // Navigate to the URL for sending message to the current number
-            await page.goto(`https://web.whatsapp.com/send?phone=${number}`, { waitUntil: 'load' });
+            await page.goto(`https://web.whatsapp.com/send?phone=${number}&text=thisisworking`, { waitUntil: 'load' });
 
             // Wait for the attachment button to appear with an increased timeout after page fully loaded
             await page.waitForSelector('.bo8jc6qi', { timeout: 60000 });
@@ -136,16 +136,13 @@ ipcMain.on('dt-start', async (event, numbers) => {
                 }
             });
 
-            // Wait for the file input to appear
             await page.waitForSelector('input[type="file"]');
 
-            const image_path = "C:\\Users\\hr\\Pictures\\Screenshots\\d.png";
+            const image_path = "C:\\Users\\Rayan Developer\\Downloads\\Telegram Desktop\\lagoons.jpg";
 
-            // Get the file extension from the image_path
             const extname = path.extname(image_path).toLowerCase();
             let fileTypeSelector;
 
-            // Determine the file type and adjust the selector accordingly
             switch (extname) {
                 case '.jpg':
                 case '.jpeg':
