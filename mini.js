@@ -162,15 +162,14 @@ ipcMain.on('dt-start', async (event, numbers) => {
             await input.uploadFile(image_path);
 
             // Wait for the send button to become clickable
-            await page.waitForSelector('.p357zi0d', { timeout: 10000 });
+            const textsinput = await page.waitForSelector('._3wFFT');
 
-            // Click on the send button
-            await page.evaluate(() => {
-                const sendButton = document.querySelector('svg[title="send"]');
-                if (sendButton) {
-                    sendButton.parentNode.click(); // Click on the parent node to trigger the click event
-                }
-            });
+            if (textsinput) {
+                await textsinput.click();
+                await sleep(10000);
+            }else {
+                await sleep(10000);
+            }    
         }
     } catch (error) {
         console.error('An error occurred:', error);
