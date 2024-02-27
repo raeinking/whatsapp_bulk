@@ -33,13 +33,27 @@ window.addEventListener('DOMContentLoaded', () => {
     
         return numbers;
     }
-    
 
+    const newPageButton = document.querySelector('.dt-newpage');
+        if (newPageButton) {
+            newPageButton.addEventListener('click', () => {
+                ipcRenderer.send('newpage');
+            });
+        }
+        
+    
+    const fileInput = document.getElementById('fileinput');
+    const textarea = document.getElementById('textarea');
+    
     const btnstart = document.querySelector('.dt-start');
     if (btnstart) {
         btnstart.addEventListener('click', () => {
             console.log('Button clicked');
-            ipcRenderer.send('dt-start', extractNumbersFromTable());
+            const file = fileInput.files[0]; // Get the selected file
+            const filePath = file ? file.path : null; // Get the file path
+            const textContent = textarea.value; // Get the content of the textarea    
+            const tableData = extractNumbersFromTable(); // Extract numbers from the table
+            ipcRenderer.send('dt-start', { filePath, textContent, tableData }); // Send file path, textarea content, and table data
         });
     }
     console.log('Preload script loaded');

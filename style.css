@@ -60,3 +60,14 @@ td:last-child {
     width: 170px;
     padding: 7px;
 }
+
+.mediaContainer {
+    max-width: 250px;
+    border: 1px solid rgb(112, 112, 112);
+}
+
+.grid .mediaContainer {
+    padding: 15px; /* Adjust spacing as needed */
+    text-align: center; /* Center the content within each media container */
+
+}

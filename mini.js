@@ -21,12 +21,27 @@
         mainWindow.loadFile('index.html');
     }
 
+    ipcMain.on('newpage', () => {
+        const newWindow = new BrowserWindow({
+            width: 800,
+            height: 600,
+            webPreferences: {
+                preload: path.join(__dirname, 'preload.js') // Make sure this path is correct
+            }
+        });
+    
+        newWindow.loadFile('media.html'); // Load your new HTML file
+    
+        newWindow.on('closed', () => {
+            newWindow = null;
+        });
+    });
+    
     // Function to find Chrome executable path
     function findChromePath() {
         const possiblePaths = [
             "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
             "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-            // Add more potential paths here based on common installation directories
         ];
 
         for (const path of possiblePaths) {
@@ -94,8 +109,11 @@ function sleep(ms) {
 }
 
 // Event handler to send messages to numbers
-ipcMain.on('dt-start', async (event, numbers) => {
+ipcMain.on('dt-start', async (event, data) => {
     try {
+        const { filePath, textContent, tableData } = data;
+        console.log(filePath);
+
         // Ensure that the browser instance is available
         if (!browser) {
             throw new Error('Browser instance not available. Open Chrome first.');
@@ -113,16 +131,16 @@ ipcMain.on('dt-start', async (event, numbers) => {
         const page = pages[0];
 
         // Loop through each number to send a message
-        for (let idx = 0; idx < numbers.length; idx++) {
-            const number = numbers[idx].trim();
+        for (let idx = 0; idx < tableData.length; idx++) {
+            const number = tableData[idx].trim();
             if (number === "") {
                 continue;
             }
             
-            console.log(`${idx + 1}/${numbers.length} => Sending message to ${number}.`);
+            console.log(`${idx + 1}/${tableData.length} => Sending message to ${number}.`);
 
             // Navigate to the URL for sending message to the current number
-            await page.goto(`https://web.whatsapp.com/send?phone=${number}&text=thisisworking`, { waitUntil: 'load' });
+            await page.goto(`https://web.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(textContent)}`, { waitUntil: 'load' });
 
             // Wait for the attachment button to appear with an increased timeout after page fully loaded
             await page.waitForSelector('.bo8jc6qi', { timeout: 60000 });
@@ -138,9 +156,7 @@ ipcMain.on('dt-start', async (event, numbers) => {
 
             await page.waitForSelector('input[type="file"]');
 
-            const image_path = "C:\\Users\\Rayan Developer\\Downloads\\Telegram Desktop\\lagoons.jpg";
-
-            const extname = path.extname(image_path).toLowerCase();
+            const extname = path.extname(filePath).toLowerCase();
             let fileTypeSelector;
 
             switch (extname) {
@@ -159,7 +175,7 @@ ipcMain.on('dt-start', async (event, numbers) => {
 
             // Upload the file using the determined file type selector
             const input = await page.$(fileTypeSelector);
-            await input.uploadFile(image_path);
+            await input.uploadFile(filePath);
 
             // Wait for the send button to become clickable
             const textsinput = await page.waitForSelector('._3wFFT');
@@ -167,7 +183,7 @@ ipcMain.on('dt-start', async (event, numbers) => {
             if (textsinput) {
                 await textsinput.click();
                 await sleep(10000);
-            }else {
+            } else {
                 await sleep(10000);
             }    
         }

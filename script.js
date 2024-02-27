@@ -116,3 +116,55 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   }
 });
+function handleDeleteButtonClick(evt) {
+    const mediaContainer = evt.target.closest('.mediaContainer');
+    if (mediaContainer) {
+        mediaContainer.remove();
+    }
+}
+const newInputButton = document.getElementById('newinput');
+if (newInputButton) {
+    newInputButton.addEventListener('click', () => {
+        // Find the existing grid container
+        const gridContainer = document.querySelector('.grid');
+        if (gridContainer) {
+            // Create a new media container
+            const mediaContainer = document.createElement('div');
+            mediaContainer.classList.add('mediaContainer', 'g-col-4');
+
+            // Create the file input element
+            const fileInputDiv = document.createElement('div');
+            fileInputDiv.classList.add('mb-3');
+            const fileInput = document.createElement('input');
+            fileInput.setAttribute('type', 'file');
+            fileInput.classList.add('form-control');
+            fileInputDiv.appendChild(fileInput);
+
+            // Create the textarea element
+            const textareaDiv = document.createElement('div');
+            textareaDiv.classList.add('mb-3');
+            const textarea = document.createElement('textarea');
+            textarea.classList.add('form-control');
+            textarea.setAttribute('id', 'exampleFormControlTextarea1');
+            textarea.setAttribute('rows', '3');
+            textareaDiv.appendChild(textarea);
+
+            // Create the delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.setAttribute('type', 'button');
+            deleteButton.classList.add('btn', 'btn-danger', 'btn-xs', 'dt-delete');
+            deleteButton.innerHTML = '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>';
+            deleteButton.addEventListener('click', handleDeleteButtonClick);
+
+            // Append the file input, textarea, and delete button elements to the media container
+            mediaContainer.appendChild(fileInputDiv);
+            mediaContainer.appendChild(textareaDiv);
+            mediaContainer.appendChild(deleteButton);
+
+            // Append the media container to the grid container
+            gridContainer.appendChild(mediaContainer);
+        } else {
+            console.error('Grid container not found.');
+        }
+    });
+}
