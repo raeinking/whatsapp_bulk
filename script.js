@@ -165,6 +165,7 @@ if (newInputButton) {
             gridContainer.appendChild(mediaContainer);
         } else {
             console.error('Grid container not found.');
+            console.error('Grid container not found.');
         }
     });
 }
