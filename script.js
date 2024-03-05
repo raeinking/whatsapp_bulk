@@ -37,50 +37,70 @@ document.addEventListener("DOMContentLoaded", function() {
   var rowCounter = 1;
 
   addButtons.forEach(function(button) {
-      button.addEventListener('click', function() {
-          var openContainer = document.querySelector('.inputsss');
-          var inputvalue = document.querySelector('.inputfeld').value;
-          var countryCode = document.querySelector('.country').value;
+    button.addEventListener('click', function() {
+        var openContainer = document.querySelector('.inputsss');
+        var inputvalue = document.querySelector('.inputfeld').value;
+        var countryCode = document.querySelector('.country').value;
 
-          if (!inputvalue.trim()) {
-              return;
-          }
+        if (!inputvalue.trim()) {
+            return;
+        }
 
-          var lines = inputvalue.split('\n');
+        var lines = inputvalue.split('\n');
+        var uniqueNumbers = new Set();
 
-          for (var j = 0; j < lines.length; j++) {
-              var newRow = document.createElement('tr');
+        for (var j = 0; j < lines.length; j++) {
+            var number = lines[j].trim().replace(/\s/g, ''); // Remove white spaces
+            number = number.replace(/^\+/, ''); // Remove leading '+' sign
+            number = number.replace(/^0+/, ''); // Remove leading zeros
 
-              var cell1 = document.createElement('td');
-              cell1.textContent = rowCounter++;
+            // Check if the number has 7 digits to determine if country code should be added
+            var formattedNumber;
+            if (number.length === 10) {
+                formattedNumber = countryCode + number;
+            } else {
+                formattedNumber = number;
+            }
 
-              var cell2 = document.createElement('td');
-              cell2.textContent = countryCode + lines[j].trim();
+            // Add formatted number to the set to check for duplicates
+            uniqueNumbers.add(formattedNumber);
+        }
 
-              var cell3 = document.createElement('td');
-              cell3.classList.add('text-center');
+        // Convert set back to an array
+        var uniqueArray = Array.from(uniqueNumbers);
 
-              var deleteButton = document.createElement('button');
-              deleteButton.setAttribute('type', 'button');
-              deleteButton.classList.add('btn', 'btn-danger', 'btn-xs', 'dt-delete');
-              var deleteSpan = document.createElement('span');
-              deleteSpan.classList.add('glyphicon', 'glyphicon-remove', 'dt-delete');
-              deleteButton.appendChild(deleteSpan);
+        for (var k = 0; k < uniqueArray.length; k++) {
+            var newRow = document.createElement('tr');
 
-              cell3.appendChild(deleteButton);
+            var cell1 = document.createElement('td');
+            cell1.textContent = rowCounter++;
 
-              newRow.appendChild(cell1);
-              newRow.appendChild(cell2);
-              newRow.appendChild(cell3);
+            var cell2 = document.createElement('td');
+            cell2.textContent = uniqueArray[k];
 
-              dataTable.row.add(newRow).draw(false);
-              openContainer.style.display = 'none';
-          }
-          document.querySelector('.inputfeld').innerHTML = ''
-      });
-  });
+            var cell3 = document.createElement('td');
+            cell3.classList.add('text-center');
 
-  // Delete numbers
+            var deleteButton = document.createElement('button');
+            deleteButton.setAttribute('type', 'button');
+            deleteButton.classList.add('btn', 'btn-danger', 'btn-xs', 'dt-delete');
+            var deleteSpan = document.createElement('span');
+            deleteSpan.classList.add('glyphicon', 'glyphicon-remove', 'dt-delete');
+            deleteButton.appendChild(deleteSpan);
+
+            cell3.appendChild(deleteButton);
+
+            newRow.appendChild(cell1);
+            newRow.appendChild(cell2);
+            newRow.appendChild(cell3);
+
+            dataTable.row.add(newRow).draw(false);
+        }
+
+        openContainer.style.display = 'none';
+        document.querySelector('.inputfeld').innerHTML = '';
+    });
+});  // Delete numbers
   var dataTableContainer = document.querySelector('.dataTable');
 
   dataTableContainer.addEventListener('click', function(evt) {
