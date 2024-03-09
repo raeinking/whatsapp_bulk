@@ -139,55 +139,71 @@ ipcMain.on('dt-start', async (event, data) => {
             
             console.log(`${idx + 1}/${tableData.length} => Sending message to ${number}.`);
 
-            // Navigate to the URL for sending message to the current number
-            await page.goto(`https://web.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(textContent)}`, { waitUntil: 'load' });
+            try {
+                // Navigate to the URL for sending message to the current number
+                await page.goto(`https://web.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(textContent)}`, { waitUntil: 'load' });
 
-            // Wait for the attachment button to appear with an increased timeout after page fully loaded
-            await page.waitForSelector('.bo8jc6qi', { timeout: 60000 });
+                // Wait for the attachment button to appear with an increased timeout after page fully loaded
+                await page.waitForSelector('.attach-menu-plus;', { timeout: 10000 });
 
-            // Click on the attachment button
-            await page.evaluate(() => {
-                // Find the element with class 'bo8jc6qi' and click it
-                const attachMenuPlus = document.querySelector('.bo8jc6qi');
-                if (attachMenuPlus) {
-                    attachMenuPlus.click();
+                // Click on the attachment button
+                await page.evaluate(() => {
+                    // Find the element with class 'bo8jc6qi' and click it
+                    const attachMenuPlus = document.querySelector('.attach-menu-plus');
+                    if (attachMenuPlus) {
+                        attachMenuPlus.click();
+                    } else {
+                        console.log("can't find this btn: ");
+                    }
+                });
+
+                // Wait for the text input field to appear
+                await page.waitForSelector('._2_1wd', { timeout: 10000 }).catch(error => {
+                    console.error('Failed to find text input field:', error);
+                });
+
+                const extname = path.extname(filePath).toLowerCase();
+                let fileTypeSelector;
+
+                switch (extname) {
+                    case '.jpg':
+                    case '.jpeg':
+                    case '.png':
+                        fileTypeSelector = 'input[type="file"][accept*="image"]';
+                        break;
+                    case '.mp4':
+                    case '.mov':
+                        fileTypeSelector = 'input[type="file"][accept*="video"]';
+                        break;
+                    default:
+                        throw new Error(`Unsupported file type: ${extname}`);
                 }
-            });
 
-            await page.waitForSelector('input[type="file"]');
+                // Upload the file using the determined file type selector
+                const input = await page.$(fileTypeSelector);
+                console.log("File input element:", input); // Logging file input element
+                await input.uploadFile(filePath);
+                console.log("File uploaded successfully."); // Logging successful upload
 
-            const extname = path.extname(filePath).toLowerCase();
-            let fileTypeSelector;
+                // Wait for the send button to become clickable
+                const sendButton = await page.waitForSelector('._3y5oW', { timeout: 10000 }).catch(error => {
+                    console.error('Failed to find send button:', error);
+                });
 
-            switch (extname) {
-                case '.jpg':
-                case '.jpeg':
-                case '.png':
-                    fileTypeSelector = 'input[type="file"][accept*="image"]';
-                    break;
-                case '.mp4':
-                case '.mov':
-                    fileTypeSelector = 'input[type="file"][accept*="video"]';
-                    break;
-                default:
-                    throw new Error(`Unsupported file type: ${extname}`);
-            }
-
-            // Upload the file using the determined file type selector
-            const input = await page.$(fileTypeSelector);
-            await input.uploadFile(filePath);
-
-            // Wait for the send button to become clickable
-            const textsinput = await page.waitForSelector('._3wFFT');
-
-            if (textsinput) {
-                await textsinput.click();
-                await sleep(10000);
-            } else {
-                await sleep(10000);
-            }    
+                if (sendButton) {
+                    await sendButton.click();
+                    console.log("Message sent successfully.");
+                    await sleep(10000); // Add a delay before proceeding to the next number
+                } else {
+                    console.error("Send button not found.");
+                }
+            } catch (error) {
+                console.error(`Error occurred while sending message to ${number}:`, error);
+                continue; // Proceed to the next number
+            } 
         }
     } catch (error) {
         console.error('An error occurred:', error);
+        // Handle overall error if needed
     }
 });
