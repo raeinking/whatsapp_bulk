@@ -144,12 +144,12 @@ ipcMain.on('dt-start', async (event, data) => {
                 await page.goto(`https://web.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(textContent)}`, { waitUntil: 'load' });
 
                 // Wait for the attachment button to appear with an increased timeout after page fully loaded
-                await page.waitForSelector('.attach-menu-plus;', { timeout: 10000 });
+                await page.waitForSelector('[data-icon="attach-menu-plus"]', { timeout: 10000 });
 
                 // Click on the attachment button
                 await page.evaluate(() => {
                     // Find the element with class 'bo8jc6qi' and click it
-                    const attachMenuPlus = document.querySelector('.attach-menu-plus');
+                    const attachMenuPlus = document.querySelector('[data-icon="attach-menu-plus"]')
                     if (attachMenuPlus) {
                         attachMenuPlus.click();
                     } else {
@@ -158,9 +158,9 @@ ipcMain.on('dt-start', async (event, data) => {
                 });
 
                 // Wait for the text input field to appear
-                await page.waitForSelector('._2_1wd', { timeout: 10000 }).catch(error => {
-                    console.error('Failed to find text input field:', error);
-                });
+                // await page.waitForSelector('._3Uu1_', { timeout: 10000 }).catch(error => {
+                //     console.error('Failed lto find text input fied:', error);
+                // });
 
                 const extname = path.extname(filePath).toLowerCase();
                 let fileTypeSelector;
@@ -181,25 +181,28 @@ ipcMain.on('dt-start', async (event, data) => {
 
                 // Upload the file using the determined file type selector
                 const input = await page.$(fileTypeSelector);
-                console.log("File input element:", input); // Logging file input element
                 await input.uploadFile(filePath);
-                console.log("File uploaded successfully."); // Logging successful upload
 
                 // Wait for the send button to become clickable
-                const sendButton = await page.waitForSelector('._3y5oW', { timeout: 10000 }).catch(error => {
+                const sendButton = await page.waitForSelector('[data-icon="send"]', { timeout: 10000 }).catch(error => {
                     console.error('Failed to find send button:', error);
+                });
+                
+                // Wait for the text input field to appear
+                await page.waitForSelector('._ah9q', { timeout: 10000 }).catch(error => {
+                    console.error('Failed lto find text input fied:', error);
                 });
 
                 if (sendButton) {
+                    await sleep(3000)
                     await sendButton.click();
-                    console.log("Message sent successfully.");
-                    await sleep(10000); // Add a delay before proceeding to the next number
+                    await sleep(10000);
                 } else {
                     console.error("Send button not found.");
                 }
             } catch (error) {
                 console.error(`Error occurred while sending message to ${number}:`, error);
-                continue; // Proceed to the next number
+                continue;
             } 
         }
     } catch (error) {
