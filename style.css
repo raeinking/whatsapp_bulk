@@ -72,3 +72,29 @@ td:last-child {
     text-align: center; /* Center the content within each media container */
 
 }
+
+.center {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    margin-bottom: 10px;
+
+}
+
+.centerr {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    width: 100%;
+    padding: 10px;
+}
+
+.table {
+    z-index: 99;
+}

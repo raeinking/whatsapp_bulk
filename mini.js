@@ -147,56 +147,60 @@ ipcMain.on('dt-start', async (event, data) => {
                 await page.waitForSelector('[data-icon="attach-menu-plus"]', { timeout: 10000 });
 
                 // Click on the attachment button
-                await page.evaluate(() => {
-                    // Find the element with class 'bo8jc6qi' and click it
-                    const attachMenuPlus = document.querySelector('[data-icon="attach-menu-plus"]')
-                    if (attachMenuPlus) {
-                        attachMenuPlus.click();
-                    } else {
-                        console.log("can't find this btn: ");
-                    }
-                });
 
                 // Wait for the text input field to appear
                 // await page.waitForSelector('._3Uu1_', { timeout: 10000 }).catch(error => {
                 //     console.error('Failed lto find text input fied:', error);
                 // });
 
-                const extname = path.extname(filePath).toLowerCase();
-                let fileTypeSelector;
+                if (filePath) {
+                    await page.evaluate(() => {
+                        // Find the element with class 'bo8jc6qi' and click it
+                        const attachMenuPlus = document.querySelector('[data-icon="attach-menu-plus"]')
+                        if (attachMenuPlus) {
+                            attachMenuPlus.click();
+                        } else {
+                            console.log("can't find this btn: ");
+                        }
+                    });
+                    
+                    const extname = path.extname(filePath).toLowerCase();
+                    let fileTypeSelector;
 
-                switch (extname) {
-                    case '.jpg':
-                    case '.jpeg':
-                    case '.png':
-                        fileTypeSelector = 'input[type="file"][accept*="image"]';
-                        break;
-                    case '.mp4':
-                    case '.mov':
-                        fileTypeSelector = 'input[type="file"][accept*="video"]';
-                        break;
-                    default:
-                        throw new Error(`Unsupported file type: ${extname}`);
+                    switch (extname) {
+                        case '.jpg':
+                        case '.jpeg':
+                        case '.png':
+                            fileTypeSelector = 'input[type="file"][accept*="image"]';
+                            break;
+                        case '.mp4':
+                        case '.mov':
+                            fileTypeSelector = 'input[type="file"][accept*="video"]';
+                            break;
+                        default:
+                            throw new Error(`Unsupported file type: ${extname}`);
+                    }
+
+                    // Upload the file using the determined file type selector
+                    const input = await page.$(fileTypeSelector);
+                    await input.uploadFile(filePath);
+                    
+                    // Wait for the text input field to appear
+                    await page.waitForSelector('._ah9q', { timeout: 10000 }).catch(error => {
+                        console.error('Failed lto find text input fied:', error);
+                    });
                 }
-
-                // Upload the file using the determined file type selector
-                const input = await page.$(fileTypeSelector);
-                await input.uploadFile(filePath);
-
-                // Wait for the send button to become clickable
+                
                 const sendButton = await page.waitForSelector('[data-icon="send"]', { timeout: 10000 }).catch(error => {
                     console.error('Failed to find send button:', error);
                 });
-                
-                // Wait for the text input field to appear
-                await page.waitForSelector('._ah9q', { timeout: 10000 }).catch(error => {
-                    console.error('Failed lto find text input fied:', error);
-                });
+
+                // Wait for the send button to become clickable
 
                 if (sendButton) {
                     await sleep(3000)
                     await sendButton.click();
-                    await sleep(10000);
+                    await sleep(12000);
                 } else {
                     console.error("Send button not found.");
                 }
