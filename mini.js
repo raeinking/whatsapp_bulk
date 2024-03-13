@@ -17,25 +17,19 @@
                 preload: path.join(__dirname, 'preload.js')
             }
         });
-
+    
         mainWindow.loadFile('index.html');
+    
+        mainWindow.on('closed', () => {
+            mainWindow = null;
+        });
+    
+        // Handle newpage event
+        ipcMain.on('newpage', () => {
+            mainWindow.loadFile('media.html');
+        });
     }
-
-    ipcMain.on('newpage', () => {
-        const newWindow = new BrowserWindow({
-            width: 800,
-            height: 600,
-            webPreferences: {
-                preload: path.join(__dirname, 'preload.js') // Make sure this path is correct
-            }
-        });
     
-        newWindow.loadFile('media.html'); // Load your new HTML file
-    
-        newWindow.on('closed', () => {
-            newWindow = null;
-        });
-    });
     
     // Function to find Chrome executable path
     function findChromePath() {
@@ -112,7 +106,6 @@ function sleep(ms) {
 ipcMain.on('dt-start', async (event, data) => {
     try {
         const { filePath, textContent, tableData } = data;
-        console.log(filePath);
 
         // Ensure that the browser instance is available
         if (!browser) {
@@ -144,16 +137,16 @@ ipcMain.on('dt-start', async (event, data) => {
                 await page.goto(`https://web.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(textContent)}`, { waitUntil: 'load' });
 
                 // Wait for the attachment button to appear with an increased timeout after page fully loaded
-                await page.waitForSelector('[data-icon="attach-menu-plus"]', { timeout: 10000 });
-
+                
                 // Click on the attachment button
-
+                
                 // Wait for the text input field to appear
                 // await page.waitForSelector('._3Uu1_', { timeout: 10000 }).catch(error => {
-                //     console.error('Failed lto find text input fied:', error);
-                // });
-
+                    //     console.error('Failed lto find text input fied:', error);
+                    // });
+                    
                 if (filePath) {
+                    await page.waitForSelector('[data-icon="attach-menu-plus"]', { timeout: 10000 });
                     await page.evaluate(() => {
                         // Find the element with class 'bo8jc6qi' and click it
                         const attachMenuPlus = document.querySelector('[data-icon="attach-menu-plus"]')
@@ -209,6 +202,11 @@ ipcMain.on('dt-start', async (event, data) => {
                 continue;
             } 
         }
+        
+        // Close the browser after sending all messages
+        await browser.close();
+        console.log('All messages sent. Browser closed.');
+        
     } catch (error) {
         console.error('An error occurred:', error);
         // Handle overall error if needed

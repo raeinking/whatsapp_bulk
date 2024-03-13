@@ -156,16 +156,17 @@ if (newInputButton) {
             const fileInputDiv = document.createElement('div');
             fileInputDiv.classList.add('mb-3');
             const fileInput = document.createElement('input');
-            fileInput.setAttribute('type', 'file');
-            fileInput.classList.add('form-control');
+            fileInput.setAttribute('type', 'file');  
+            fileInput.setAttribute('id', 'fileinput');  
+            fileInput.classList.add('form-control' , 'fileinput');
             fileInputDiv.appendChild(fileInput);
 
             // Create the textarea element
             const textareaDiv = document.createElement('div');
             textareaDiv.classList.add('mb-3');
             const textarea = document.createElement('textarea');
-            textarea.classList.add('form-control');
-            textarea.setAttribute('id', 'exampleFormControlTextarea1');
+            textarea.classList.add('form-control', 'textarea');
+            textarea.setAttribute('id', 'textarea');
             textarea.setAttribute('rows', '3');
             textareaDiv.appendChild(textarea);
 

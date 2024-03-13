@@ -42,10 +42,11 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         
     
-    const fileInput = document.getElementById('fileinput');
+    const fileInput = document.querySelectorAll('fileinput');
     const textarea = document.getElementById('textarea');
     
     const btnstart = document.querySelector('.dt-start');
+    console.log('Button clicked');
     if (btnstart) {
         btnstart.addEventListener('click', () => {
             console.log('Button clicked');
