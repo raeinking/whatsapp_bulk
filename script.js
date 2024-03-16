@@ -1,3 +1,4 @@
+
 // script.js
 document.addEventListener("DOMContentLoaded", function() {
   // DataTable initialization
@@ -25,12 +26,13 @@ document.addEventListener("DOMContentLoaded", function() {
   var closeContainer = document.querySelector('.dt-close');
 
   closeContainer.addEventListener('click', function() {
-      openContainer.style.display = 'none';
-  });
+    openContainer.style.display = 'none';
+});
 
-  openButton.addEventListener('click', function() {
-      openContainer.style.display = 'flex';
-  });
+
+openButton.addEventListener('click', function() {
+    openContainer.style.display = 'flex';
+});
 
   // Add numbers
   var addButtons = document.querySelectorAll('.dt-add');
@@ -101,25 +103,26 @@ document.addEventListener("DOMContentLoaded", function() {
         document.querySelector('.inputfeld').innerHTML = '';
     });
 });  // Delete numbers
-  var dataTableContainer = document.querySelector('.dataTable');
 
-  dataTableContainer.addEventListener('click', function(evt) {
-      if (evt.target && evt.target.classList.contains('dt-delete')) {
-          var dtRow = evt.target.closest('tr');
-          if (confirm("Are you sure to delete this row?")) {
-              dataTable.row(dtRow).remove().draw(false);
-              updateRowIDs();
-          }
-      }
-  });
+var dataTableContainer = document.querySelector('.dataTable');
+
+dataTableContainer.addEventListener('click', function(evt) {
+    if (evt.target && evt.target.classList.contains('dt-delete')) {
+        var dtRow = evt.target.closest('tr');
+        if (confirm("Are you sure to delete this row?")) {
+            dataTable.row(dtRow).remove().draw(false);
+            updateRowIDs();
+        }
+    }
+});
 
   // Update row IDs
   function updateRowIDs() {
-      var rows = dataTable.rows().nodes();
-      for (var i = 0; i < rows.length; i++) {
-          rows[i].querySelector('td:first-child').textContent = i + 1;
-      }
-  }
+    var rows = dataTable.rows().nodes();
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].querySelector('td:first-child').textContent = i + 1;
+    }
+}
 
   // Modal
   var modal = document.getElementById('myModal');
@@ -136,6 +139,22 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   }
 });
+
+function extractNumbersFromTable() {
+    const numbers = [];
+    const tableRows = document.querySelectorAll('#example tbody tr');
+
+    tableRows.forEach(row => {
+        const phoneNumberCell = row.querySelector('td:nth-child(2)');
+        if (phoneNumberCell) {
+            const phoneNumber = phoneNumberCell.textContent.trim();
+            numbers.push(phoneNumber);
+        }
+    });
+
+    return numbers;
+}
+
 function handleDeleteButtonClick(evt) {
     const mediaContainer = evt.target.closest('.mediaContainer');
     if (mediaContainer) {

@@ -25,10 +25,23 @@
         });
     
         // Handle newpage event
-        ipcMain.on('newpage', () => {
-            mainWindow.loadFile('media.html');
+        ipcMain.on('newpage', (_, tableData) => {
+            // Convert tableData to a JSON string
+            const jsonData = JSON.stringify(tableData);
+            
+            // Load media.html with query parameters including the extracted numbers
+            mainWindow.loadURL(`file://${__dirname}/media.html?data=${encodeURIComponent(jsonData)}`);
+        });
+    
+        // Handle dt-start event
+        ipcMain.on('dt-start', (event, data) => {
+            console.log('Received dt-start event with data:', data);
+            // You can perform any necessary actions with the data here
+            // Pass the tableData directly to the 'newpage' event
+            mainWindow.webContents.send('newpage', tableData);
         });
     }
+    
     
     
     // Function to find Chrome executable path
@@ -66,7 +79,6 @@
         try {
             // Find Chrome executable path
             const chromePath = findChromePath();
-            console.log(chromePath);
     
             if (!chromePath) {
                 throw new Error('Chrome executable not found.');
@@ -84,7 +96,6 @@
     
             // Set the viewport size manually
             const { width, height } = mainWindow.getContentSize();
-            console.log(width, height);
 
                 // Set the viewport size to match the content size of the Electron window
             await page.setViewport({ width: 1000, height: 800 });
@@ -204,8 +215,8 @@ ipcMain.on('dt-start', async (event, data) => {
         }
         
         // Close the browser after sending all messages
-        await browser.close();
-        console.log('All messages sent. Browser closed.');
+        // await browser.close();
+        // console.log('All messages sent. Browser closed.');
         
     } catch (error) {
         console.error('An error occurred:', error);

@@ -14,10 +14,24 @@ window.addEventListener('DOMContentLoaded', () => {
     const btn = document.querySelector('.dt-send');
     if (btn) {
         btn.addEventListener('click', () => {
-            console.log('Button clicked');
             ipcRenderer.send('open-chrome');
         });
-    }
+    }       
+
+    window.extractNumbersFromTable = function() {
+        const numbers = [];
+        const tableRows = document.querySelectorAll('#example tbody tr');
+    
+        tableRows.forEach(row => {
+            const phoneNumberCell = row.querySelector('td:nth-child(2)');
+            if (phoneNumberCell) {
+                const phoneNumber = phoneNumberCell.textContent.trim();
+                numbers.push(phoneNumber);
+            }
+        });
+    
+        return numbers;
+    };
 
     function extractNumbersFromTable() {
         const numbers = [];
@@ -33,30 +47,49 @@ window.addEventListener('DOMContentLoaded', () => {
     
         return numbers;
     }
+    
 
     const newPageButton = document.querySelector('.dt-newpage');
-        if (newPageButton) {
-            newPageButton.addEventListener('click', () => {
-                ipcRenderer.send('newpage');
+    if (newPageButton) {
+        newPageButton.addEventListener('click', () => {
+            // Extract numbers from the table
+            const tableData = extractNumbersFromTable();
+
+            // Convert tableData to a JSON string
+            const jsonData = JSON.stringify(tableData);
+
+            // Send the data to the main process with the event name 'newpage'
+            ipcRenderer.send('newpage', jsonData);
+        });
+    }
+        
+    
+    
+        const btnstart = document.querySelector('.dt-start');
+        console.log('Button clicked');
+        if (btnstart) {
+            btnstart.addEventListener('click', () => {
+                console.log('Button clicked');
+    
+                // Get file input and textarea
+                const fileInput = document.querySelectorAll('.fileinput');
+                const textarea = document.getElementById('textarea');
+    
+                // Get the selected file and its path
+                const file = fileInput[0].files[0];
+                const filePath = file ? file.path : null;
+    
+                // Get the content of the textarea
+                const textContent = textarea.value;
+    
+                // Extract numbers from the table
+                const tableData = extractNumbersFromTable();
+    
+                // Send the data to the main process
+                ipcRenderer.send('dt-start', { filePath, textContent, tableData });
             });
         }
         
-    
-    const fileInput = document.querySelectorAll('fileinput');
-    const textarea = document.getElementById('textarea');
-    
-    const btnstart = document.querySelector('.dt-start');
-    console.log('Button clicked');
-    if (btnstart) {
-        btnstart.addEventListener('click', () => {
-            console.log('Button clicked');
-            const file = fileInput.files[0]; // Get the selected file
-            const filePath = file ? file.path : null; // Get the file path
-            const textContent = textarea.value; // Get the content of the textarea    
-            const tableData = extractNumbersFromTable(); // Extract numbers from the table
-            ipcRenderer.send('dt-start', { filePath, textContent, tableData }); // Send file path, textarea content, and table data
-        });
-    }
     console.log('Preload script loaded');
 
     // Listen for the 'qr-code' event from the main process
