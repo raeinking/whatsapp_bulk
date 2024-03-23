@@ -9,10 +9,9 @@
     
     // Function to create the main window
     function createWindow() {
-        const { width, height } = screen.getPrimaryDisplay().workAreaSize;
         mainWindow = new BrowserWindow({
-            width: width,
-            height: height,
+            width: 800,
+            height: 600,
             webPreferences: {
                 preload: path.join(__dirname, 'preload.js')
             }
@@ -27,10 +26,15 @@
         // Handle newpage event
         ipcMain.on('newpage', (_, tableData) => {
             // Convert tableData to a JSON string
+            console.log(tableData); // Example: Log the received tableData
             const jsonData = JSON.stringify(tableData);
             
             // Load media.html with query parameters including the extracted numbers
             mainWindow.loadURL(`file://${__dirname}/media.html?data=${encodeURIComponent(jsonData)}`);
+        });
+        ipcMain.on('table-data', (_, tableData) => {
+            // Now you can use the tableData as needed
+            console.log(tableData); // Example: Log the received tableData
         });
     
         // Handle dt-start event
@@ -95,10 +99,9 @@
             const page = pages.length > 0 ? pages[0] : await browser.newPage();
     
             // Set the viewport size manually
-            const { width, height } = mainWindow.getContentSize();
 
                 // Set the viewport size to match the content size of the Electron window
-            await page.setViewport({ width: 1000, height: 800 });
+            await page.setViewport({ width: 800, height: 600 });
                             
             // Navigate to WhatsApp website
             await page.goto('https://web.whatsapp.com/');
@@ -157,7 +160,7 @@ ipcMain.on('dt-start', async (event, data) => {
                     // });
                     
                 if (filePath) {
-                    await page.waitForSelector('[data-icon="attach-menu-plus"]', { timeout: 10000 });
+                    await page.waitForSelector('[data-icon="attach-menu-plus"]', { timeout: 15000 });
                     await page.evaluate(() => {
                         // Find the element with class 'bo8jc6qi' and click it
                         const attachMenuPlus = document.querySelector('[data-icon="attach-menu-plus"]')
@@ -190,12 +193,12 @@ ipcMain.on('dt-start', async (event, data) => {
                     await input.uploadFile(filePath);
                     
                     // Wait for the text input field to appear
-                    await page.waitForSelector('._ah9q', { timeout: 10000 }).catch(error => {
+                    await page.waitForSelector('._ah9q', { timeout: 15000 }).catch(error => {
                         console.error('Failed lto find text input fied:', error);
                     });
                 }
                 
-                const sendButton = await page.waitForSelector('[data-icon="send"]', { timeout: 10000 }).catch(error => {
+                const sendButton = await page.waitForSelector('[data-icon="send"]', { timeout: 15000 }).catch(error => {
                     console.error('Failed to find send button:', error);
                 });
 

@@ -49,17 +49,36 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     
 
+    // const newPageButton = document.querySelector('.dt-newpage');
+    // if (newPageButton) {
+    //     newPageButton.addEventListener('click', () => {
+    //         // Extract numbers from the table
+    //         const tableData = extractNumbersFromTable();
+
+    //         // Convert tableData to a JSON string
+    //         const jsonData = JSON.stringify(tableData);
+
+    //         // Send the data to the main process with the event name 'newpage'
+    //         ipcRenderer.send('newpage', jsonData);
+    //     });
+    // }
+    function sendDataToMainProcess(tableData) {
+        // ipcRenderer.send('table-data', tableData); // Sending tableData to the main process
+        ipcRenderer.send('newpage', tableData);
+    }
+    
+    // Find the button with class '.dt-newpage'
     const newPageButton = document.querySelector('.dt-newpage');
+    
+    // Add event listener to the button
     if (newPageButton) {
         newPageButton.addEventListener('click', () => {
             // Extract numbers from the table
             const tableData = extractNumbersFromTable();
+    
+            // Call the function to send data to the main process
+            sendDataToMainProcess(tableData);
 
-            // Convert tableData to a JSON string
-            const jsonData = JSON.stringify(tableData);
-
-            // Send the data to the main process with the event name 'newpage'
-            ipcRenderer.send('newpage', jsonData);
         });
     }
         
