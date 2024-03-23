@@ -87,22 +87,27 @@ if (btnstart) {
     btnstart.addEventListener('click', () => {
         console.log(tableData);
 
-        // Get file input and textarea
-        const fileInput = document.querySelectorAll('.fileinput');
-        const textarea = document.getElementById('textarea');
+        // Get file inputs and text areas
+        const fileInputs = document.querySelectorAll('.fileinput');
+        const textareas = document.querySelectorAll('.textarea');
 
-        // Get the selected file and its path
-        const file = fileInput[0].files[0];
-        const filePath = file ? file.path : null;
+        // Initialize array to store pairs of file paths and text contents
+        let dataToSend = [];
 
-        // Get the content of the textarea
-        const textContent = textarea.value;
+        // Loop through each file input and corresponding text area
+        fileInputs.forEach((fileInput, index) => {
+            const files = fileInput.files;
+            const filePath = files.length > 0 ? files[0].path : null; // Take the first file path if available
+            const textContent = textareas[index] ? textareas[index].value : ''; // Get corresponding text content
 
-        // Send the data to the main process
-        ipcRenderer.send('dt-start', { filePath, textContent, tableData });
+            // Add file path and text content to the array as an object
+            dataToSend.push({ filePath, textContent });
+        });
+
+        // Send the array of objects to the main process
+        ipcRenderer.send('dt-start', { dataToSend, tableData });
     });
 }
-    
         // const btnstart = document.querySelector('.dt-start');
         // console.log('Button clicked');
         // if (btnstart) {
