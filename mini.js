@@ -8,6 +8,8 @@
     const chrome = require('selenium-webdriver/chrome');
     
     // Function to create the main window
+    let tableDataa = []
+
     function createWindow() {
         mainWindow = new BrowserWindow({
             width: 800,
@@ -26,15 +28,15 @@
         // Handle newpage event
         ipcMain.on('newpage', (_, tableData) => {
             // Convert tableData to a JSON string
-            console.log(tableData); // Example: Log the received tableData
             const jsonData = JSON.stringify(tableData);
+
+            tableDataa = tableData
             
             // Load media.html with query parameters including the extracted numbers
             mainWindow.loadURL(`file://${__dirname}/media.html?data=${encodeURIComponent(jsonData)}`);
         });
         ipcMain.on('table-data', (_, tableData) => {
             // Now you can use the tableData as needed
-            console.log(tableData); // Example: Log the received tableData
         });
     
         // Handle dt-start event
@@ -42,7 +44,7 @@
             console.log('Received dt-start event with data:', data);
             // You can perform any necessary actions with the data here
             // Pass the tableData directly to the 'newpage' event
-            mainWindow.webContents.send('newpage', tableData);
+            mainWindow.webContents.send('newpage');
         });
     }
     
@@ -118,8 +120,9 @@ function sleep(ms) {
 
 // Event handler to send messages to numbers
 ipcMain.on('dt-start', async (event, data) => {
+    console.log(tableDataa);
     try {
-        const { filePath, textContent, tableData } = data;
+        const { filePath, textContent } = data;
 
         // Ensure that the browser instance is available
         if (!browser) {
@@ -138,13 +141,13 @@ ipcMain.on('dt-start', async (event, data) => {
         const page = pages[0];
 
         // Loop through each number to send a message
-        for (let idx = 0; idx < tableData.length; idx++) {
-            const number = tableData[idx].trim();
+        for (let idx = 0; idx < tableDataa.length; idx++) {
+            const number = tableDataa[idx].trim();
             if (number === "") {
                 continue;
             }
             
-            console.log(`${idx + 1}/${tableData.length} => Sending message to ${number}.`);
+            console.log(`${idx + 1}/${tableDataa.length} => Sending message to ${number}.`);
 
             try {
                 // Navigate to the URL for sending message to the current number
@@ -218,7 +221,7 @@ ipcMain.on('dt-start', async (event, data) => {
         }
         
         // Close the browser after sending all messages
-        // await browser.close();
+        await browser.close();
         // console.log('All messages sent. Browser closed.');
         
     } catch (error) {
