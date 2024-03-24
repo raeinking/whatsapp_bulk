@@ -228,10 +228,9 @@ function sleep(ms) {
 //         // Handle overall error if needed
 //     }
 // });
-ipcMain.on('dt-start', async (event, data) => {
-    console.log(data.tableDataa);
-    try {
 
+ipcMain.on('dt-start', async (event, data) => {
+    try {
         // Ensure that the browser instance is available
         if (!browser) {
             throw new Error('Browser instance not available. Open Chrome first.');
@@ -248,64 +247,72 @@ ipcMain.on('dt-start', async (event, data) => {
         // Use the first page to send messages
         const page = pages[0];
 
-        // Loop through each object in tableDataa to send messages
-        for (let i = 0; i < tableDataa.length; i++) {
-            const { filePaths, textContent } = data.tableDataa[i];
-            if (!filePaths || filePaths.length === 0 || !textContent) {
-                console.error(`Missing filePaths or textContent at index ${i}. Skipping.`);
-                continue;
+        // Loop through each item in tableDataa
+        for (let idx = 0; idx < tableDataa.length; idx++) {
+            const number = tableDataa[idx].trim();
+            if (number === "") {
+                continue; // Skip empty entries
             }
-            
-            console.log(`Sending message ${i + 1}/${tableDataa.length} with textContent: ${textContent}.`);
 
-            try {
-                // Navigate to the URL for sending message
-                await page.goto(`https://web.whatsapp.com/send?text=${encodeURIComponent(textContent)}`, { waitUntil: 'load' });
+            // Loop through each object in dataToSend to send messages
+            for (let i = 0; i < data.dataToSend.length; i++) {
+                const { filePath, textContent } = data.dataToSend[i];
+                console.log(filePath, textContent);
+                if (!filePath || filePath.length === 0 || !textContent) {
+                    console.error(`Missing filePaths or textContent at index ${i}. Skipping.`);
+                    continue;
+                }
 
-                // Wait for the text input field to appear
-                await page.waitForSelector('._3u328', { timeout: 15000 }).catch(error => {
-                    console.error('Failed to find text input field:', error);
-                });
+                console.log(`${idx + 1}/${tableDataa[idx]} => Sending message to ${number}.`);
 
-                // Loop through each filePath and upload the file
-                for (let j = 0; j < filePaths.length; j++) {
-                    const filePath = filePaths[j];
-                    console.log(`Uploading file ${j + 1}/${filePaths.length}: ${filePath}`);
+                try {
+                    // Navigate to the URL for sending message
+                    await page.goto(`https://web.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(textContent)}`, { waitUntil: 'load' });
 
-                    await page.waitForSelector('[data-icon="clip"]', { timeout: 15000 });
+                    // Wait for the text input field to appear
+                    await page.waitForSelector('._3Uu1_', { timeout: 15000 });
+
+                    // If filePath is provided, upload the file
+                    if (filePath) {
+                    await page.waitForSelector('[data-icon="attach-menu-plus"]', { timeout: 15000 });
                     await page.evaluate(() => {
-                        // Find the element with class 'PVMjB' and click it to open file input
-                        const clipButton = document.querySelector('[data-icon="clip"]');
-                        if (clipButton) {
-                            clipButton.click();
+                        // Find the element with class 'bo8jc6qi' and click it
+                        const attachMenuPlus = document.querySelector('[data-icon="attach-menu-plus"]')
+                        if (attachMenuPlus) {
+                            attachMenuPlus.click();
                         } else {
-                            console.log("Can't find clip button.");
+                            console.log("can't find this btn: ");
                         }
                     });
 
-                    // Upload the file
-                    const input = await page.$('input[type="file"]');
-                    await input.uploadFile(filePath);
-                }
+                        // Upload the file
+                        const input = await page.$('input[type="file"]');
+                        await input.uploadFile(filePath);
+                    }
 
-                // Wait for the send button to become clickable
-                const sendButton = await page.waitForSelector('[data-icon="send"]', { timeout: 15000 }).catch(error => {
-                    console.error('Failed to find send button:', error);
-                });
+                    // Wait for the send button to become clickable
+                    await page.waitForSelector('[data-icon="send"]', { timeout: 15000 });
 
-                if (sendButton) {
-                    await sleep(3000);
-                    await sendButton.click();
-                    await sleep(12000);
-                } else {
-                    console.error("Send button not found.");
+                    // Click the send button to send the message
+                    await page.evaluate(() => {
+                        // Find the element with the send icon and click it
+                        const sendButton = document.querySelector('[data-icon="send"]');
+                        if (sendButton) {
+                            sendButton.click();
+                        } else {
+                            console.error("Send button not found.");
+                        }
+                    });
+
+                    // Wait for some time before sending the next message
+                    await page.waitForTimeout(5000);
+                } catch (error) {
+                    console.error(`Error occurred while sending message at index ${i}:`, error);
+                    continue;
                 }
-            } catch (error) {
-                console.error(`Error occurred while sending message at index ${i}:`, error);
-                continue;
-            } 
+            }
         }
-        
+
         // Close the browser after sending all messages
         await browser.close();
     } catch (error) {
