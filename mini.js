@@ -251,19 +251,13 @@ ipcMain.on('dt-start', async (event, data) => {
         for (let idx = 0; idx < tableDataa.length; idx++) {
             const number = tableDataa[idx].trim();
             if (number === "") {
-                continue; // Skip empty entries
+                continue; 
             }
 
             // Loop through each object in dataToSend to send messages
-            for (let i = 0; i < data.dataToSend.length; i++) {
-                const { filePath, textContent } = data.dataToSend[i];
-                console.log(filePath, textContent);
-                if (!filePath || filePath.length === 0 || !textContent) {
-                    console.error(`Missing filePaths or textContent at index ${i}. Skipping.`);
-                    continue;
-                }
+            
 
-                console.log(`${idx + 1}/${tableDataa[idx]} => Sending message to ${number}.`);
+                // console.log(`${idx + 1}/${tableDataa[idx]} => Sending message to ${number}.`);
 
                 try {
                     // Navigate to the URL for sending message
@@ -311,7 +305,7 @@ ipcMain.on('dt-start', async (event, data) => {
                     continue;
                 }
             }
-        }
+        
 
         // Close the browser after sending all messages
         await browser.close();
@@ -320,3 +314,24 @@ ipcMain.on('dt-start', async (event, data) => {
         // Handle overall error if needed
     }
 });
+
+
+
+
+
+// for (let i = 0; i < data.dataToSend.length; i++) {
+//     const { filePath, textContent } = data.dataToSend[i];
+//     console.log(filePath, textContent);
+//     if (!filePath || filePath.length === 0 || !textContent) {
+//         console.error(`Missing filePaths or textContent at index ${i}. Skipping.`);
+//         continue;
+//     }
+
+
+
+
+
+
+
+
+// }
