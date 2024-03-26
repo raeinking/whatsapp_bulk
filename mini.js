@@ -261,7 +261,7 @@ ipcMain.on('dt-start', async (event, data) => {
 
             try {
 
-                await page.goto(`https://web.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(textContent)}`, { waitUntil: 'load' });
+                await page.goto(`https://web.whatsapp.com/send?phone=${number}`, { waitUntil: 'load' });
 
                 for (let i = 0; i < data.dataToSend.length; i++) {
                     const { filePath, textContent } = data.dataToSend[i];
@@ -277,37 +277,78 @@ ipcMain.on('dt-start', async (event, data) => {
                     // Wait for the text input field to appear
                     await page.waitForSelector('._3Uu1_', { timeout: 15000 });
 
-                    // If filePath is provided, upload the file
-                    if (filePath) {
-                        await page.waitForSelector('[data-icon="attach-menu-plus"]', { timeout: 15000 });
-                        await page.evaluate(() => {
-                            // Find the element with class 'bo8jc6qi' and click it
-                            const attachMenuPlus = document.querySelector('[data-icon="attach-menu-plus"]')
+                
+                
+                
+                
+                
+                // If filePath is provided, upload the file
+                if (filePath) {
+                    await page.waitForSelector('[data-icon="attach-menu-plus"]', { timeout: 15000 });
+                    await page.evaluate(() => {
+                        // Find the element with class 'bo8jc6qi' and click it
+                        const attachMenuPlus = document.querySelector('[data-icon="attach-menu-plus"]')
                             if (attachMenuPlus) {
                                 attachMenuPlus.click();
                             } else {
                                 console.log("can't find this btn: ");
                             }
                         });
-
+                        
                         // Upload the file
                         const input = await page.$('input[type="file"]');
                         await input.uploadFile(filePath);
+                        await page.waitForSelector('.iin4x6c7', { timeout: 15000 });
+                        const elements = document.querySelectorAll('.iq0m558w');
+
+                        // Check if any elements with the class '.iq0m558w' are found
+                        if (elements.length > 0) {
+                            // Select the first element with the class '.iq0m558w'
+                            const firstElement = elements[0];
+
+                            // Select all <br> elements directly within the first element
+                            const brElements = firstElement.querySelectorAll('br');
+
+                            // Loop through each <br> element
+                            brElements.forEach(br => {
+                                // Create a new span element
+                                const newSpan = document.createElement('span');
+                                newSpan.classList.add('selectable-text', 'copyable-text');
+                                newSpan.setAttribute('data-lexical-text', 'true');
+                                newSpan.textContent = 'gasdf'; // Text content for the new span
+
+                                // Replace the <br> element with the new <span> element
+                                br.parentNode.replaceChild(newSpan, br);
+                            });
+                        } else {
+                            console.log('No elements with the class ".iq0m558w" found.');
+                        }
+
+
+        
+                        if (sendButtons) {
+                            sendButtons.click();
+                            sendButtons.focus();
+                        } else {
+                            console.log('Second button not found.');
+                        }
                     }
 
+
+                    
                     // Wait for the send button to become clickable
-                    await page.waitForSelector('[data-icon="send"]', { timeout: 15000 });
+                    // await page.waitForSelector('[data-icon="send"]', { timeout: 15000 });
 
                     // Click the send button to send the message
-                    await page.evaluate(() => {
-                        // Find the element with the send icon and click it
-                        const sendButton = document.querySelector('[data-icon="send"]');
-                        if (sendButton) {
-                            sendButton.click();
-                        } else {
-                            console.error("Send button not found.");
-                        }
-                    });
+                    // await page.evaluate(() => {
+                    //     // Find the element with the send icon and click it
+                    //     const sendButton = document.querySelector('[data-icon="send"]');
+                    //     if (sendButton) {
+                    //         sendButton.click();
+                    //     } else {
+                    //         console.error("Send button not found.");
+                    //     }
+                    // });
 
                     // Wait for some time before sending the next message
                     await page.waitForTimeout(5000);
@@ -320,7 +361,7 @@ ipcMain.on('dt-start', async (event, data) => {
 
 
         // Close the browser after sending all messages
-        await browser.close();
+        // await browser.close();
     } catch (error) {
         console.error('An error occurred:', error);
         // Handle overall error if needed
@@ -336,4 +377,22 @@ ipcMain.on('dt-start', async (event, data) => {
 
 
 
+// class="to2l77zo gfz4du6o ag5g9lrv bze30y65 kao4egtt"
+// class="selectable-text copyable-text iq0m558w g0rxnol2"
+// class="lhggkp7q qq0sjtgm jxacihee c3x5l3r8 b9fczbqn t35qvd06 m62443ks rkxvyd19 c5h0bzs2 bze30y65 kao4egtt"
+
+
+
+
+
+// class="g0rxnol2 ln8gz9je lexical-rich-text-input"
+// class="to2l77zo gfz4du6o ag5g9lrv bze30y65 kao4egtt qh0vvdkp"
+// class="selectable-text copyable-text iq0m558w g0rxnol2"
+// class="lhggkp7q qq0sjtgm jxacihee c3x5l3r8 b9fczbqn t35qvd06 m62443ks rkxvyd19 c5h0bzs2 bze30y65 kao4egtt"
+
+
+// class="g0rxnol2 ln8gz9je iin4x6c7 jnwc1y2a   svoq16ka g4oj0cdv tviruh8d b6f1x6w7 bbv8nyr4 to2l77zo lexical-rich-text-input"
+// class="to2l77zo gfz4du6o ag5g9lrv fe5nidar kao4egtt"
+// class="selectable-text copyable-text iq0m558w g0rxnol2"
+// class="lhggkp7q qq0sjtgm jxacihee c3x5l3r8 b9fczbqn t35qvd06 m62443ks rkxvyd19 c5h0bzs2 fe5nidar kao4egtt"
 
