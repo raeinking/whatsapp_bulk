@@ -262,24 +262,26 @@ ipcMain.on('dt-start', async (event, data) => {
             try {
 
                 await page.goto(`https://web.whatsapp.com/send?phone=${number}`, { waitUntil: 'load' });
-
-                for (let i = 0; i < data.dataToSend.length; i++) {
-                    const { filePath, textContent } = data.dataToSend[i];
-                    console.log(filePath, textContent);
-                    if (!filePath || filePath.length === 0 || !textContent) {
-                        console.error(`Missing filePaths or textContent at index ${i}. Skipping.`);
-                        continue;
-                    }
-
-
+                
+                // for (let i = 0; i < data.dataToSend.length; i++) {
+                    //     const { filePath, textContent } = data.dataToSend[i];
+                //     console.log(filePath, textContent);
+                //     if (!filePath || filePath.length === 0 || !textContent) {
+                    //         console.error(`Missing filePaths or textContent at index ${i}. Skipping.`);
+                    //         continue;
+                    //     }
+                    
+                    
                     // Navigate to the URL for sending message
-
+                    
                     // Wait for the text input field to appear
                     await page.waitForSelector('._3Uu1_', { timeout: 15000 });
-
-                
-                
-                
+                    
+                    
+                    
+                    
+                    const filePath = data;
+                    console.log(filePath);
                 
                 
                 // If filePath is provided, upload the file
@@ -300,38 +302,60 @@ ipcMain.on('dt-start', async (event, data) => {
                         await input.uploadFile(filePath);
                         await page.waitForSelector('.iin4x6c7', { timeout: 15000 });
                         const elements = document.querySelectorAll('.iq0m558w');
+                        // Select all <p> elements with the class '.x15bjb6t'
+                        const paragraphElements = document.querySelectorAll('p.x15bjb6t');
 
-                        // Check if any elements with the class '.iq0m558w' are found
-                        if (elements.length > 0) {
-                            // Select the first element with the class '.iq0m558w'
-                            const firstElement = elements[0];
+                        // Select the last <p> element from the NodeList
+                        const lastParagraphElement = paragraphElements[paragraphElements.length - 1];
 
-                            // Select all <br> elements directly within the first element
-                            const brElements = firstElement.querySelectorAll('br');
+                        if (lastParagraphElement) {
+                            // Select the <br> element directly within the last paragraph element
+                            const brElement = lastParagraphElement.querySelector('br');
 
-                            // Loop through each <br> element
-                            brElements.forEach(br => {
+                            if (brElement) {
                                 // Create a new span element
                                 const newSpan = document.createElement('span');
                                 newSpan.classList.add('selectable-text', 'copyable-text');
                                 newSpan.setAttribute('data-lexical-text', 'true');
-                                newSpan.textContent = 'gasdf'; // Text content for the new span
+                                newSpan.textContent = 'type'; // Text content for the new span
 
                                 // Replace the <br> element with the new <span> element
-                                br.parentNode.replaceChild(newSpan, br);
-                            });
-                        } else {
-                            console.log('No elements with the class ".iq0m558w" found.');
+                                brElement.parentNode.replaceChild(newSpan, brElement);
+                            }
                         }
+
+
+                        // Check if any elements with the class '.iq0m558w' are found
+                        // if (elements.length > 0) {
+                        //     // Select the first element with the class '.iq0m558w'
+                        //     const firstElement = elements[0];
+
+                        //     // Select all <br> elements directly within the first element
+                        //     const brElements = firstElement.querySelectorAll('br');
+
+                        //     // Loop through each <br> element
+                        //     brElements.forEach(br => {
+                        //         // Create a new span element
+                        //         const newSpan = document.createElement('span');
+                        //         newSpan.classList.add('selectable-text', 'copyable-text');
+                        //         newSpan.setAttribute('data-lexical-text', 'true');
+                        //         newSpan.textContent = 'gasdf'; // Text content for the new span
+
+                        //         // Replace the <br> element with the new <span> element
+                        //         br.parentNode.replaceChild(newSpan, br);
+                        //     });
+                        // } else {
+                        //     console.log('No elements with the class ".iq0m558w" found.');
+                        // }
 
 
         
-                        if (sendButtons) {
-                            sendButtons.click();
-                            sendButtons.focus();
-                        } else {
-                            console.log('Second button not found.');
-                        }
+                        // if (sendButtons) {
+                        //     sendButtons.click();
+                        //     sendButtons.focus();
+                        // } else {
+                        //     console.log('Second button not found.');
+                        // }
                     }
 
 
@@ -351,10 +375,10 @@ ipcMain.on('dt-start', async (event, data) => {
                     // });
 
                     // Wait for some time before sending the next message
-                    await page.waitForTimeout(5000);
-                }
+                    await page.waitForTimeout(25000);
+                // }
             } catch (error) {
-                console.error(`Error occurred while sending message at index ${i}:`, error);
+                console.error(`Error occurred while sending message at index ${i}:`, error, );
                 continue;
             }
         }
